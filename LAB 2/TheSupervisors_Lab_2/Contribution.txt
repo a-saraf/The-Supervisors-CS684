@@ -1,0 +1,1 @@
+All the members were on the same google meet while discussing the statechart on paper and while finalising the implementation on Yakindu. We also brainstormed the test cases together.
