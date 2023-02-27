@@ -1,2 +1,6 @@
 # The-Supervisors-CS684
-Team Repo for CS684 : Embedded Systems
+__Group Members :__
+1. Tanmay Ajay Joshi 
+2. Shaun Zacharia
+3. Anmol Saraf
+
