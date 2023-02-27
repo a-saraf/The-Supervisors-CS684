@@ -4,3 +4,7 @@ __Group Members :__
 2. Shaun Zacharia
 3. Anmol Saraf
 
+
+---
+
+**LAB 2** - Yakindu Statechart for LineFOllower. Marks Obtained 50/50. 
