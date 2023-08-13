@@ -1,0 +1,1 @@
+All the team members discussed the hardware implementation and worked on debugging together. Everyone was present during algorithm finalisation and fine tuning on hardware. 

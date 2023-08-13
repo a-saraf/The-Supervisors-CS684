@@ -1,0 +1,185 @@
+node valet(is0,is1,is2,is3,is4,ir0,ir1,ir2: int) returns (v_left,v_right, direction, side_vals: int)
+(*s0,s1,s2,s3,s4 are the 5 white line sensors and 
+ir0,ir1,ir2 are the 3 IR proximity sensors*)
+var
+s0,s1,s2,s3,s4: int;
+ss0, ss1, ss2, ss3, ss4: bool;
+thrs : int;
+vel_out_right, vel_out_left: int;
+pid_forward, pid_left: int;
+kp1, kp2, kp3, kd1, kd2, kd3: int;
+obstacle_mode: bool;
+black: int;
+counter: int;
+
+let
+	kp1 = 1; kp2 = 4; kp3 = 3; kd1 = 2; kd2 = 2; kd3 = 2;
+	automaton
+		state Init
+			do
+			v_left = 0;
+			v_right = 0;
+			direction = 1;
+			obstacle_mode = false;
+			counter = 250;
+			until (ss0 or ss1 or ss2 or ss3 or ss4) then LineFollowing
+			
+		state LineFollowing
+			do 
+			automaton
+				state Init
+					do  
+					direction = 1;
+					v_left = 0;
+					v_right = 0;
+					obstacle_mode = false;
+					counter = 250;
+					until (ss2) then Fwd
+
+				state Fwd
+					do 
+					v_left = vel_out_left;
+					v_right = vel_out_right;
+					direction = 1;
+					obstacle_mode = false;
+					counter = 250;
+					until ((ss0 or ss1 or ss2 or ss3 or ss4) = false) then Back
+					(* | (ss0 and ss1 and ss2 and ss3 and ss4) then Stop *)
+			
+				state Back
+					do 
+					direction = 0;
+					v_left = 100;
+					v_right = 100;
+					obstacle_mode = false;
+					counter = 250;
+					until ((ss0 or ss1 or ss2 or ss3 or ss4)) then Fwd
+				(* state Stop
+					do
+					direction = 1;
+					v_left = 0;
+					v_right = 0;
+					obstacle_mode = false; *)
+			end;
+			until ir0 = 1 then ObstacleAvoidance
+			| (black = 1) and (ir1 = 1) then Parking
+		state ObstacleAvoidance
+			do
+			automaton
+				state RotateLeft
+					do
+					v_right = 85;
+					v_left = 0;
+					direction = 1;
+					obstacle_mode = true;
+					counter = 250;
+					until ((ir1 = 1) and (ir2 = 1)) then Follow
+				state Follow
+					do 
+					v_right = 75;
+					v_left = 120;
+					direction = 1;
+					obstacle_mode = true;
+					counter = 250;
+					until (ir1 = 0)  then RotateRight
+				state RotateRight  
+					do
+					v_right = 0;
+					v_left = 90;
+					direction = 1;
+					obstacle_mode = true;
+					counter = 250;
+					until (ir1 = 1) then Follow
+			end;
+			(* until ((ss0 or ss1 or ss2 or ss3 or ss4) and (ir0 = 0)) then LineFollowing *)
+			until ((s2 > 850) and (ir0 = 0)) then LineFollowing
+		state Parking
+			do
+			automaton
+				state Straight
+					do
+					v_left = vel_out_left;
+					v_right = vel_out_right;
+					direction = 1;
+					obstacle_mode = false;
+					counter = 250;
+					until (ir1 = 0) then Right
+				state Right
+					do
+					v_right = 25;
+					v_left = 130;
+					direction = 1;
+					obstacle_mode = false;
+					counter = 430->pre(counter)-1;
+					until (counter <= 0) then Stop
+				state Forward
+					do 
+					v_right = 60;
+					v_left = 60;
+					direction = 1;
+					obstacle_mode = false;
+					counter = 250;
+					until (ir0 = 1) then Stop
+				state Stop
+					do
+					v_right = 0;
+					v_left = 0;
+					direction = 1;
+					obstacle_mode = false;
+					counter = 250;
+			end;
+	end;
+	
+	automaton
+		state PID
+			do 
+			(* pid_forward = 0 -> (kp1*(s2) + kd1*(s2 - pre(s2))) / 24; *)
+			pid_forward = 80;
+			pid_left = 0 -> (kp2*(s0 - s4) + kp3*(s1 - s3) + kd2*(s0 - pre(s0) - s4 + pre(s4)) + kd3*(s1 - pre(s1) - s3 + pre(s3))) / 24;
+			vel_out_left = if (pid_forward - pid_left) > 55 and (pid_forward - pid_left) < 150 then (pid_forward - pid_left) else if (pid_forward - pid_left) <= 55 then 55 else 150;
+			vel_out_right = if (pid_forward + pid_left) > 55 and (pid_forward + pid_left) < 150 then (pid_forward + pid_left) else if (pid_forward + pid_left) <= 55 then 55 else 150;
+			until obstacle_mode = true then Obs
+		state Obs
+			do
+			pid_forward = 0;
+			pid_left = 0;
+			vel_out_left = 45;
+			vel_out_right = 45;
+			unless obstacle_mode = false then PID
+	end;
+
+	automaton
+		state WhiteLine
+			do
+			thrs = 700;
+			s0 = is0;
+			s1 = is1;
+			s2 = is2;
+			s3 = is3;
+			s4 = is4;			
+			ss0 = if (s0 > thrs) then true else false;
+			ss1 = if (s1 > thrs) then true else false;
+			ss2 = if (s2 > thrs) then true else false;
+			ss3 = if (s3 > thrs) then true else false;
+			ss4 = if (s4 > thrs) then true else false;
+			side_vals = (s0+s4)/2 - (s1+s2+s3)/3;
+			black = 0;
+			until ((side_vals > 350) and (not obstacle_mode) and (ss0 and ss4)) then BlackLine
+			(* until true then BlackLine *)
+		state BlackLine
+			do
+			thrs = 500;
+			s0 = 1023 - is0;
+			s1 = 1023 - is1;
+			s2 = 1023 - is2;
+			s3 = 1023 - is3;
+			s4 = 1023 - is4;			
+			ss0 = if (s0 > thrs) then true else false;
+			ss1 = if (s1 > thrs) then true else false;
+			ss2 = if (s2 > thrs) then true else false;
+			ss3 = if (s3 > thrs) then true else false;
+			ss4 = if (s4 > thrs) then true else false;
+			side_vals = (s0+s4)/2 - (s1+s2+s3)/3;
+			black = 1;
+	end;
+tel

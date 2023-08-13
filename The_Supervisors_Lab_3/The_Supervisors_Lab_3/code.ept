@@ -1,0 +1,142 @@
+node valet(ns0,ns1,ns2,ns3,ns4: int; nir0,nir1,nir2: int) returns (v_left,v_right, direction: int)
+(*s0,s1,s2,s3,s4 are the 5 white line sensors and 
+ir0,ir1,ir2 are the 3 IR proximity sensors*)
+var
+s0,s1,s2,s3,s4,ir0,ir1,ir2: int;
+ss0, ss1, ss2, ss3, ss4, ii0, ii1, ii2: bool;
+obstacle_avoiding_mode: bool;
+thrs, thri, thrdir: int;
+vel_out_right, vel_out_left: int;
+pid_forward, pid_left: int;
+kp1, kp2, kp3, kd1, kd2, kd3: int;
+
+let
+	s0 = ((ns0 + 50)*1024)/100;
+	s1 = ((ns1 + 50)*1024)/100;
+	s2 = ((ns2 + 50)*1024)/100;
+	s3 = ((ns3 + 50)*1024)/100;
+	s4 = ((ns4 + 50)*1024)/100;
+	ir0 = ((nir0 + 50)*1024)/100;
+	ir1 = ((nir1 + 50)*1024)/100;
+	ir2 = ((nir2 + 50)*1024)/100;
+
+	thrs = 640; thri = 640; thrdir = 20;
+	(*The thresholds correspond to 12.5 on the scale from -50 to 50*)
+	kp1 = 90; kp2 = 30; kp3 = 60; kd1 = 10; kd2 = 4; kd3 = 6;	
+	ss0 = if (s0 > thrs) then true else false;
+	ss1 = if (s1 > thrs) then true else false;
+	ss2 = if (s2 > thrs) then true else false;
+	ss3 = if (s3 > thrs) then true else false;
+	ss4 = if (s4 > thrs) then true else false;
+	ii0 = if (ir0 > thri) then true else false;
+	ii1 = if (ir1 > thri) then true else false;
+	ii2 = if (ir2 > thri) then true else false;
+
+	automaton
+		state Init
+			do
+			obstacle_avoiding_mode = false;
+			v_left = 0;
+			v_right = 0;
+			direction = 0;
+			until (ss0 or ss1 or ss2 or ss3 or ss4) then LineFollowing
+			
+		state LineFollowing
+			do 
+			obstacle_avoiding_mode = false;
+			automaton
+				state Init
+					do  
+					v_left = 0;
+					v_right = 0;
+					direction = 0;
+					until (ss2) then Fwd
+
+				state Fwd
+					do 
+					v_left = vel_out_left;
+					v_right = vel_out_right;
+					direction = 1;
+					until (v_left > v_right + thrdir) then Right
+					    | (v_left + thrdir < v_right ) then Left
+						| ((ss0 or ss1 or ss2 or ss3 or ss4) = false) then Backward
+						| ((ss0 and ss1 and ss2 and ss3 and ss4) = true) then Stopped
+				
+				state Left
+					do
+					v_left = vel_out_left;
+					v_right = vel_out_right;
+					direction = 2;
+					until (v_left + thrdir > v_right) then Fwd
+					    | ((ss0 or ss1 or ss2 or ss3 or ss4) = false) then Backward
+						| ((ss0 and ss1 and ss2 and ss3 and ss4) = true) then Stopped
+				
+				state Right
+					do
+					v_left = vel_out_left;
+					v_right = vel_out_right;
+					direction = 3;
+					until (v_right + thrdir > v_left) then Fwd
+					    | ((ss0 or ss1 or ss2 or ss3 or ss4) = false) then Backward
+						| ((ss0 and ss1 and ss2 and ss3 and ss4) = true) then Stopped
+				
+				state Backward
+					do 
+					v_left = 100;
+					v_right = 100;
+					direction = 4;
+					until (ss2) then Fwd
+					    | ((ss0 and ss1 and ss2 and ss3 and ss4) = true) then Stopped
+				
+				state Stopped
+					do 
+					v_left = 0;
+					v_right = 0;
+					direction = 0;	
+			end;
+		until (ii1) then ObstacleAvoiding 
+		
+		state ObstacleAvoiding
+			do
+			obstacle_avoiding_mode = true;
+			automaton 
+				state Start
+					do 
+					v_left = 0;
+					v_right = 100;
+					direction = 2;
+					until ((ii1 = false) and (ii2 = true)) then Following
+				state Right
+					do 
+					v_left = 100;
+					v_right = 0;
+					direction = 3;
+					until ((ii2 = true)) then Following
+				state Following
+					do 
+					v_left = 100;
+					v_right = 100;
+					direction = 1;
+					until (ii2 = false) then Right  
+			end;
+			until (ss2 and not ii1) then LineFollowing
+	end;
+	
+	automaton
+		state PID
+			do 
+			pid_forward = 0 -> (kp1*(s2) + kd1*(s2 - pre(s2))) / 1024;
+			pid_left = 0 -> (kp2*(s0 - s4) + kp3*(s1 - s3) + kd2*(s0 - pre(s0) - s4 + pre(s4)) + kd3*(s1 - pre(s1) - s3 + pre(s3))) / 1024;
+			vel_out_left = if (pid_forward - pid_left) > 0 and (pid_forward - pid_left) < 100 then (pid_forward - pid_left) else if (pid_forward - pid_left) <= 0 then 0 else 100;
+			vel_out_right = if (pid_forward + pid_left) > 0 and (pid_forward + pid_left) < 100 then (pid_forward + pid_left) else if (pid_forward + pid_left) <= 0 then 0 else 100;
+		 	until (obstacle_avoiding_mode) then NoPID
+
+		state NoPID
+			do
+			pid_forward = 0;
+			pid_left = 0;
+			vel_out_left = 0;
+			vel_out_right = 0;
+			until (not obstacle_avoiding_mode) then PID
+	end;
+tel

@@ -1,0 +1,625 @@
+type st_5 = St_5_Parking|St_5_ObstacleAvoidance|St_5_LineFollowing|St_5_Init
+type st_4 = St_4_Straight|St_4_Stop|St_4_Right|St_4_Forward
+type st_3 = St_3_RotateRight|St_3_RotateLeft|St_3_Follow
+type st_2 = St_2_Init|St_2_Fwd|St_2_Back
+type st_1 = St_1_PID|St_1_Obs
+type st = St_WhiteLine|St_BlackLine
+node valet(is0 : int; is1 : int; is2 : int; is3 : int; is4 : int; ir0 : int;
+            ir1 : int; ir2 : int)
+returns (v_left : int; v_right : int; direction : int; side_vals : int)
+var counter : int; black : int; obstacle_mode : bool; kd3 : int; kd2 : int;
+    kd1 : int; kp3 : int; kp2 : int; kp1 : int; pid_left : int;
+    pid_forward : int; vel_out_left : int; vel_out_right : int; thrs : int;
+    ss4 : bool; ss3 : bool; ss2 : bool; ss1 : bool; ss0 : bool; s4 : int;
+    s3 : int; s2 : int; s1 : int; s0 : int; pnr : bool; nr : bool; r : bool;
+    ns : st; pnr_1 : bool; nr_1 : bool; r_1 : bool; ns_1 : st_1; s_1 : st_1;
+    pnr_5 : bool; nr_5 : bool; r_5 : bool; ns_5 : st_5; ck_6 : st;
+    side_vals_St_WhiteLine : int; s0_St_WhiteLine : int;
+    s1_St_WhiteLine : int; s2_St_WhiteLine : int; s3_St_WhiteLine : int;
+    s4_St_WhiteLine : int; ss0_St_WhiteLine : bool; ss1_St_WhiteLine : bool;
+    ss2_St_WhiteLine : bool; ss3_St_WhiteLine : bool;
+    ss4_St_WhiteLine : bool; thrs_St_WhiteLine : int;
+    black_St_WhiteLine : int; ns_St_WhiteLine : st; nr_St_WhiteLine : bool;
+    side_vals_St_BlackLine : int; s0_St_BlackLine : int;
+    s1_St_BlackLine : int; s2_St_BlackLine : int; s3_St_BlackLine : int;
+    s4_St_BlackLine : int; ss0_St_BlackLine : bool; ss1_St_BlackLine : bool;
+    ss2_St_BlackLine : bool; ss3_St_BlackLine : bool;
+    ss4_St_BlackLine : bool; thrs_St_BlackLine : int;
+    black_St_BlackLine : int; ns_St_BlackLine : st; nr_St_BlackLine : bool;
+    v_93 : bool; v_94 : bool; v_95 : bool; v_96 : bool; v_97 : bool;
+    v_98 : bool; v_99 : bool; v_100 : bool; v_101 : bool; v_102 : bool;
+    v_103 : int; v_104 : int; v_105 : int; v_106 : int; v_107 : int;
+    v_83 : bool; v_84 : bool; v_85 : bool; v_86 : bool; v_87 : bool;
+    v_88 : int; v_89 : int; v_90 : int; v_91 : int; v_92 : int; ck_5 : st_1;
+    vel_out_right_St_1_PID : int; vel_out_left_St_1_PID : int;
+    pid_forward_St_1_PID : int; pid_left_St_1_PID : int;
+    ns_1_St_1_PID : st_1; nr_1_St_1_PID : bool; vel_out_right_St_1_Obs : int;
+    vel_out_left_St_1_Obs : int; pid_forward_St_1_Obs : int;
+    pid_left_St_1_Obs : int; ns_1_St_1_Obs : st_1; nr_1_St_1_Obs : bool;
+    v_42 : bool; v_43 : bool; v_44 : bool; v_45 : int; v_46 : int;
+    v_47 : int; v_48 : int; v_49 : int; v_50 : int; v_51 : int; v_52 : int;
+    v_53 : int; v_54 : int; v_55 : int; v_56 : int; v_57 : int; v_58 : int;
+    v_59 : int; v_60 : int; v_61 : int; v_62 : int; v_63 : int; v_64 : int;
+    v_65 : int; v_66 : bool; v_67 : int; v_68 : bool; v_69 : bool;
+    v_70 : int; v_71 : int; v_72 : bool; v_73 : int; v_74 : int; v_75 : bool;
+    v_76 : int; v_77 : bool; v_78 : bool; v_79 : int; v_80 : int;
+    v_81 : bool; v_82 : int; ck_4 : st_1; s_1_St_1_PID : st_1;
+    r_1_St_1_PID : bool; s_1_St_1_Obs : st_1; r_1_St_1_Obs : bool;
+    v_41 : bool; ck : st_5; v_left_St_5_Init : int; v_right_St_5_Init : int;
+    direction_St_5_Init : int; obstacle_mode_St_5_Init : bool;
+    counter_St_5_Init : int; ns_5_St_5_Init : st_5; nr_5_St_5_Init : bool;
+    v_left_St_5_LineFollowing : int; v_right_St_5_LineFollowing : int;
+    direction_St_5_LineFollowing : int;
+    obstacle_mode_St_5_LineFollowing : bool;
+    counter_St_5_LineFollowing : int; ns_5_St_5_LineFollowing : st_5;
+    nr_5_St_5_LineFollowing : bool; v_left_St_5_ObstacleAvoidance : int;
+    v_right_St_5_ObstacleAvoidance : int;
+    direction_St_5_ObstacleAvoidance : int;
+    obstacle_mode_St_5_ObstacleAvoidance : bool;
+    counter_St_5_ObstacleAvoidance : int; ns_5_St_5_ObstacleAvoidance : st_5;
+    nr_5_St_5_ObstacleAvoidance : bool; v_left_St_5_Parking : int;
+    v_right_St_5_Parking : int; direction_St_5_Parking : int;
+    obstacle_mode_St_5_Parking : bool; counter_St_5_Parking : int;
+    ns_5_St_5_Parking : st_5; nr_5_St_5_Parking : bool; v_37 : bool;
+    v_38 : bool; v_39 : bool; v_40 : bool; pnr_2 : bool; nr_2 : bool;
+    r_2 : bool; ns_2 : st_2; v_20 : bool; v_21 : bool; v_22 : bool;
+    v_23 : bool; v_24 : st_5; v_25 : bool; v_36 : bool; ck_1 : st_2;
+    v_left_St_5_LineFollowing_St_2_Init : int;
+    v_right_St_5_LineFollowing_St_2_Init : int;
+    direction_St_5_LineFollowing_St_2_Init : int;
+    obstacle_mode_St_5_LineFollowing_St_2_Init : bool;
+    counter_St_5_LineFollowing_St_2_Init : int; ns_2_St_2_Init : st_2;
+    nr_2_St_2_Init : bool; v_left_St_5_LineFollowing_St_2_Fwd : int;
+    v_right_St_5_LineFollowing_St_2_Fwd : int;
+    direction_St_5_LineFollowing_St_2_Fwd : int;
+    obstacle_mode_St_5_LineFollowing_St_2_Fwd : bool;
+    counter_St_5_LineFollowing_St_2_Fwd : int; ns_2_St_2_Fwd : st_2;
+    nr_2_St_2_Fwd : bool; v_left_St_5_LineFollowing_St_2_Back : int;
+    v_right_St_5_LineFollowing_St_2_Back : int;
+    direction_St_5_LineFollowing_St_2_Back : int;
+    obstacle_mode_St_5_LineFollowing_St_2_Back : bool;
+    counter_St_5_LineFollowing_St_2_Back : int; ns_2_St_2_Back : st_2;
+    nr_2_St_2_Back : bool; v_35 : st_2; v_30 : bool; v_31 : bool;
+    v_32 : bool; v_33 : bool; v_34 : bool; v_26 : bool; v_27 : bool;
+    v_28 : bool; v_29 : bool; pnr_3 : bool; nr_3 : bool; r_3 : bool;
+    ns_3 : st_3; v_10 : bool; v_11 : bool; v_12 : bool; v_19 : bool;
+    ck_2 : st_3; v_left_St_5_ObstacleAvoidance_St_3_RotateLeft : int;
+    v_right_St_5_ObstacleAvoidance_St_3_RotateLeft : int;
+    direction_St_5_ObstacleAvoidance_St_3_RotateLeft : int;
+    obstacle_mode_St_5_ObstacleAvoidance_St_3_RotateLeft : bool;
+    counter_St_5_ObstacleAvoidance_St_3_RotateLeft : int;
+    ns_3_St_3_RotateLeft : st_3; nr_3_St_3_RotateLeft : bool;
+    v_left_St_5_ObstacleAvoidance_St_3_Follow : int;
+    v_right_St_5_ObstacleAvoidance_St_3_Follow : int;
+    direction_St_5_ObstacleAvoidance_St_3_Follow : int;
+    obstacle_mode_St_5_ObstacleAvoidance_St_3_Follow : bool;
+    counter_St_5_ObstacleAvoidance_St_3_Follow : int;
+    ns_3_St_3_Follow : st_3; nr_3_St_3_Follow : bool;
+    v_left_St_5_ObstacleAvoidance_St_3_RotateRight : int;
+    v_right_St_5_ObstacleAvoidance_St_3_RotateRight : int;
+    direction_St_5_ObstacleAvoidance_St_3_RotateRight : int;
+    obstacle_mode_St_5_ObstacleAvoidance_St_3_RotateRight : bool;
+    counter_St_5_ObstacleAvoidance_St_3_RotateRight : int;
+    ns_3_St_3_RotateRight : st_3; nr_3_St_3_RotateRight : bool; v_18 : st_3;
+    v_15 : bool; v_16 : bool; v_17 : bool; v_14 : bool; v_13 : bool;
+    pnr_4 : bool; nr_4 : bool; r_4 : bool; ns_4 : st_4; v_9 : bool;
+    ck_3 : st_4; v_left_St_5_Parking_St_4_Straight : int;
+    v_right_St_5_Parking_St_4_Straight : int;
+    direction_St_5_Parking_St_4_Straight : int;
+    obstacle_mode_St_5_Parking_St_4_Straight : bool;
+    counter_St_5_Parking_St_4_Straight : int; ns_4_St_4_Straight : st_4;
+    nr_4_St_4_Straight : bool; v_left_St_5_Parking_St_4_Right : int;
+    v_right_St_5_Parking_St_4_Right : int;
+    direction_St_5_Parking_St_4_Right : int;
+    obstacle_mode_St_5_Parking_St_4_Right : bool;
+    counter_St_5_Parking_St_4_Right : int; ns_4_St_4_Right : st_4;
+    nr_4_St_4_Right : bool; v_left_St_5_Parking_St_4_Forward : int;
+    v_right_St_5_Parking_St_4_Forward : int;
+    direction_St_5_Parking_St_4_Forward : int;
+    obstacle_mode_St_5_Parking_St_4_Forward : bool;
+    counter_St_5_Parking_St_4_Forward : int; ns_4_St_4_Forward : st_4;
+    nr_4_St_4_Forward : bool; v_left_St_5_Parking_St_4_Stop : int;
+    v_right_St_5_Parking_St_4_Stop : int;
+    direction_St_5_Parking_St_4_Stop : int;
+    obstacle_mode_St_5_Parking_St_4_Stop : bool;
+    counter_St_5_Parking_St_4_Stop : int; ns_4_St_4_Stop : st_4;
+    nr_4_St_4_Stop : bool; v_8 : st_4; v_7 : bool; v_1 : bool; v_2 : bool;
+    v_3 : bool; v_4 : bool; v_5 : int; v_6 : int; v : bool;
+let
+  r = pnr;
+  pnr = false fby nr;
+  ck_6 = St_WhiteLine fby ns;
+  black_St_WhiteLine = 0;
+  side_vals_St_WhiteLine = (v_104 - v_107);
+  v_107 = (v_106 / 3);
+  v_106 = (v_105 + (s3 when St_WhiteLine(ck_6)));
+  v_105 = ((s1 when St_WhiteLine(ck_6)) + (s2 when St_WhiteLine(ck_6)));
+  v_104 = (v_103 / 2);
+  v_103 = ((s0 when St_WhiteLine(ck_6)) + (s4 when St_WhiteLine(ck_6)));
+  ss4_St_WhiteLine = if v_102 then true else false;
+  v_102 = ((s4 when St_WhiteLine(ck_6)) > (thrs when St_WhiteLine(ck_6)));
+  ss3_St_WhiteLine = if v_101 then true else false;
+  v_101 = ((s3 when St_WhiteLine(ck_6)) > (thrs when St_WhiteLine(ck_6)));
+  ss2_St_WhiteLine = if v_100 then true else false;
+  v_100 = ((s2 when St_WhiteLine(ck_6)) > (thrs when St_WhiteLine(ck_6)));
+  ss1_St_WhiteLine = if v_99 then true else false;
+  v_99 = ((s1 when St_WhiteLine(ck_6)) > (thrs when St_WhiteLine(ck_6)));
+  ss0_St_WhiteLine = if v_98 then true else false;
+  v_98 = ((s0 when St_WhiteLine(ck_6)) > (thrs when St_WhiteLine(ck_6)));
+  s4_St_WhiteLine = (is4 when St_WhiteLine(ck_6));
+  s3_St_WhiteLine = (is3 when St_WhiteLine(ck_6));
+  s2_St_WhiteLine = (is2 when St_WhiteLine(ck_6));
+  s1_St_WhiteLine = (is1 when St_WhiteLine(ck_6));
+  s0_St_WhiteLine = (is0 when St_WhiteLine(ck_6));
+  thrs_St_WhiteLine = 700;
+  nr_St_WhiteLine = if v_97 then true else false;
+  ns_St_WhiteLine = if v_97 then St_BlackLine else St_WhiteLine;
+  v_97 = (v_95 & v_96);
+  v_96 = ((ss0 when St_WhiteLine(ck_6)) & (ss4 when St_WhiteLine(ck_6)));
+  v_95 = (v_93 & v_94);
+  v_94 = not((obstacle_mode when St_WhiteLine(ck_6)));
+  v_93 = ((side_vals when St_WhiteLine(ck_6)) > 350);
+  black_St_BlackLine = 1;
+  side_vals_St_BlackLine = (v_89 - v_92);
+  v_92 = (v_91 / 3);
+  v_91 = (v_90 + (s3 when St_BlackLine(ck_6)));
+  v_90 = ((s1 when St_BlackLine(ck_6)) + (s2 when St_BlackLine(ck_6)));
+  v_89 = (v_88 / 2);
+  v_88 = ((s0 when St_BlackLine(ck_6)) + (s4 when St_BlackLine(ck_6)));
+  ss4_St_BlackLine = if v_87 then true else false;
+  v_87 = ((s4 when St_BlackLine(ck_6)) > (thrs when St_BlackLine(ck_6)));
+  ss3_St_BlackLine = if v_86 then true else false;
+  v_86 = ((s3 when St_BlackLine(ck_6)) > (thrs when St_BlackLine(ck_6)));
+  ss2_St_BlackLine = if v_85 then true else false;
+  v_85 = ((s2 when St_BlackLine(ck_6)) > (thrs when St_BlackLine(ck_6)));
+  ss1_St_BlackLine = if v_84 then true else false;
+  v_84 = ((s1 when St_BlackLine(ck_6)) > (thrs when St_BlackLine(ck_6)));
+  ss0_St_BlackLine = if v_83 then true else false;
+  v_83 = ((s0 when St_BlackLine(ck_6)) > (thrs when St_BlackLine(ck_6)));
+  s4_St_BlackLine = (1023 - (is4 when St_BlackLine(ck_6)));
+  s3_St_BlackLine = (1023 - (is3 when St_BlackLine(ck_6)));
+  s2_St_BlackLine = (1023 - (is2 when St_BlackLine(ck_6)));
+  s1_St_BlackLine = (1023 - (is1 when St_BlackLine(ck_6)));
+  s0_St_BlackLine = (1023 - (is0 when St_BlackLine(ck_6)));
+  thrs_St_BlackLine = 500;
+  nr_St_BlackLine = false;
+  ns_St_BlackLine = St_BlackLine;
+  side_vals =
+    merge ck_6
+      (St_BlackLine -> side_vals_St_BlackLine)
+      (St_WhiteLine -> side_vals_St_WhiteLine);
+  s0 =
+    merge ck_6
+      (St_BlackLine -> s0_St_BlackLine)(St_WhiteLine -> s0_St_WhiteLine);
+  s1 =
+    merge ck_6
+      (St_BlackLine -> s1_St_BlackLine)(St_WhiteLine -> s1_St_WhiteLine);
+  s2 =
+    merge ck_6
+      (St_BlackLine -> s2_St_BlackLine)(St_WhiteLine -> s2_St_WhiteLine);
+  s3 =
+    merge ck_6
+      (St_BlackLine -> s3_St_BlackLine)(St_WhiteLine -> s3_St_WhiteLine);
+  s4 =
+    merge ck_6
+      (St_BlackLine -> s4_St_BlackLine)(St_WhiteLine -> s4_St_WhiteLine);
+  ss0 =
+    merge ck_6
+      (St_BlackLine -> ss0_St_BlackLine)(St_WhiteLine -> ss0_St_WhiteLine);
+  ss1 =
+    merge ck_6
+      (St_BlackLine -> ss1_St_BlackLine)(St_WhiteLine -> ss1_St_WhiteLine);
+  ss2 =
+    merge ck_6
+      (St_BlackLine -> ss2_St_BlackLine)(St_WhiteLine -> ss2_St_WhiteLine);
+  ss3 =
+    merge ck_6
+      (St_BlackLine -> ss3_St_BlackLine)(St_WhiteLine -> ss3_St_WhiteLine);
+  ss4 =
+    merge ck_6
+      (St_BlackLine -> ss4_St_BlackLine)(St_WhiteLine -> ss4_St_WhiteLine);
+  thrs =
+    merge ck_6
+      (St_BlackLine -> thrs_St_BlackLine)(St_WhiteLine -> thrs_St_WhiteLine);
+  black =
+    merge ck_6
+      (St_BlackLine -> black_St_BlackLine)
+      (St_WhiteLine -> black_St_WhiteLine);
+  ns =
+    merge ck_6
+      (St_BlackLine -> ns_St_BlackLine)(St_WhiteLine -> ns_St_WhiteLine);
+  nr =
+    merge ck_6
+      (St_BlackLine -> nr_St_BlackLine)(St_WhiteLine -> nr_St_WhiteLine);
+  pnr_1 = false fby nr_1;
+  ck_5 = s_1;
+  vel_out_right_St_1_PID = if v_78 then v_79 else v_82;
+  v_82 = if v_81 then 55 else 150;
+  v_81 = (v_80 <= 55);
+  v_80 = ((pid_forward when St_1_PID(ck_5)) + (pid_left when St_1_PID(ck_5)));
+  v_79 = ((pid_forward when St_1_PID(ck_5)) + (pid_left when St_1_PID(ck_5)));
+  v_78 = (v_75 & v_77);
+  v_77 = (v_76 < 150);
+  v_76 = ((pid_forward when St_1_PID(ck_5)) + (pid_left when St_1_PID(ck_5)));
+  v_75 = (v_74 > 55);
+  v_74 = ((pid_forward when St_1_PID(ck_5)) + (pid_left when St_1_PID(ck_5)));
+  vel_out_left_St_1_PID = if v_69 then v_70 else v_73;
+  v_73 = if v_72 then 55 else 150;
+  v_72 = (v_71 <= 55);
+  v_71 = ((pid_forward when St_1_PID(ck_5)) - (pid_left when St_1_PID(ck_5)));
+  v_70 = ((pid_forward when St_1_PID(ck_5)) - (pid_left when St_1_PID(ck_5)));
+  v_69 = (v_66 & v_68);
+  v_68 = (v_67 < 150);
+  v_67 = ((pid_forward when St_1_PID(ck_5)) - (pid_left when St_1_PID(ck_5)));
+  v_66 = (v_65 > 55);
+  v_65 = ((pid_forward when St_1_PID(ck_5)) - (pid_left when St_1_PID(ck_5)));
+  pid_left_St_1_PID = if v_44 then 0 else v_64;
+  v_64 = (v_63 / 24);
+  v_63 = (v_56 + v_62);
+  v_62 = ((kd3 when St_1_PID(ck_5)) * v_61);
+  v_61 = (v_59 + v_60);
+  v_60 = pre (s3 when St_1_PID(ck_5));
+  v_59 = (v_58 - (s3 when St_1_PID(ck_5)));
+  v_58 = ((s1 when St_1_PID(ck_5)) - v_57);
+  v_57 = pre (s1 when St_1_PID(ck_5));
+  v_56 = (v_49 + v_55);
+  v_55 = ((kd2 when St_1_PID(ck_5)) * v_54);
+  v_54 = (v_52 + v_53);
+  v_53 = pre (s4 when St_1_PID(ck_5));
+  v_52 = (v_51 - (s4 when St_1_PID(ck_5)));
+  v_51 = ((s0 when St_1_PID(ck_5)) - v_50);
+  v_50 = pre (s0 when St_1_PID(ck_5));
+  v_49 = (v_46 + v_48);
+  v_48 = ((kp3 when St_1_PID(ck_5)) * v_47);
+  v_47 = ((s1 when St_1_PID(ck_5)) - (s3 when St_1_PID(ck_5)));
+  v_46 = ((kp2 when St_1_PID(ck_5)) * v_45);
+  v_45 = ((s0 when St_1_PID(ck_5)) - (s4 when St_1_PID(ck_5)));
+  v_44 = if v_43 then true else (r_1 when St_1_PID(ck_5));
+  v_43 = true fby false;
+  pid_forward_St_1_PID = 80;
+  nr_1_St_1_PID = if v_42 then true else false;
+  ns_1_St_1_PID = if v_42 then St_1_Obs else St_1_PID;
+  v_42 = ((obstacle_mode when St_1_PID(ck_5)) = true);
+  vel_out_right_St_1_Obs = 45;
+  vel_out_left_St_1_Obs = 45;
+  pid_left_St_1_Obs = 0;
+  pid_forward_St_1_Obs = 0;
+  nr_1_St_1_Obs = false;
+  ns_1_St_1_Obs = St_1_Obs;
+  vel_out_right =
+    merge ck_5
+      (St_1_Obs -> vel_out_right_St_1_Obs)
+      (St_1_PID -> vel_out_right_St_1_PID);
+  vel_out_left =
+    merge ck_5
+      (St_1_Obs -> vel_out_left_St_1_Obs)(St_1_PID -> vel_out_left_St_1_PID);
+  pid_forward =
+    merge ck_5
+      (St_1_Obs -> pid_forward_St_1_Obs)(St_1_PID -> pid_forward_St_1_PID);
+  pid_left =
+    merge ck_5 (St_1_Obs -> pid_left_St_1_Obs)(St_1_PID -> pid_left_St_1_PID);
+  ns_1 = merge ck_5 (St_1_Obs -> ns_1_St_1_Obs)(St_1_PID -> ns_1_St_1_PID);
+  nr_1 = merge ck_5 (St_1_Obs -> nr_1_St_1_Obs)(St_1_PID -> nr_1_St_1_PID);
+  ck_4 = St_1_PID fby ns_1;
+  r_1_St_1_PID = (pnr_1 when St_1_PID(ck_4));
+  s_1_St_1_PID = St_1_PID;
+  r_1_St_1_Obs = if v_41 then true else (pnr_1 when St_1_Obs(ck_4));
+  s_1_St_1_Obs = if v_41 then St_1_PID else St_1_Obs;
+  v_41 = ((obstacle_mode when St_1_Obs(ck_4)) = false);
+  s_1 = merge ck_4 (St_1_Obs -> s_1_St_1_Obs)(St_1_PID -> s_1_St_1_PID);
+  r_1 = merge ck_4 (St_1_Obs -> r_1_St_1_Obs)(St_1_PID -> r_1_St_1_PID);
+  r_5 = pnr_5;
+  pnr_5 = false fby nr_5;
+  ck = St_5_Init fby ns_5;
+  counter_St_5_Init = 250;
+  obstacle_mode_St_5_Init = false;
+  direction_St_5_Init = 1;
+  v_right_St_5_Init = 0;
+  v_left_St_5_Init = 0;
+  nr_5_St_5_Init = if v_40 then true else false;
+  ns_5_St_5_Init = if v_40 then St_5_LineFollowing else St_5_Init;
+  v_40 = (v_39 or (ss4 when St_5_Init(ck)));
+  v_39 = (v_38 or (ss3 when St_5_Init(ck)));
+  v_38 = (v_37 or (ss2 when St_5_Init(ck)));
+  v_37 = ((ss0 when St_5_Init(ck)) or (ss1 when St_5_Init(ck)));
+  r_2 = pnr_2;
+  pnr_2 = if (r_5 when St_5_LineFollowing(ck)) then false else v_36;
+  v_36 = false fby nr_2;
+  ck_1 = if (r_5 when St_5_LineFollowing(ck)) then St_2_Init else v_35;
+  v_35 = St_2_Init fby ns_2;
+  counter_St_5_LineFollowing_St_2_Init = 250;
+  obstacle_mode_St_5_LineFollowing_St_2_Init = false;
+  v_right_St_5_LineFollowing_St_2_Init = 0;
+  v_left_St_5_LineFollowing_St_2_Init = 0;
+  direction_St_5_LineFollowing_St_2_Init = 1;
+  nr_2_St_2_Init =
+    if ((ss2 when St_5_LineFollowing(ck)) when St_2_Init(ck_1))
+    then true
+    else false;
+  ns_2_St_2_Init =
+    if ((ss2 when St_5_LineFollowing(ck)) when St_2_Init(ck_1))
+    then St_2_Fwd
+    else St_2_Init;
+  counter_St_5_LineFollowing_St_2_Fwd = 250;
+  obstacle_mode_St_5_LineFollowing_St_2_Fwd = false;
+  direction_St_5_LineFollowing_St_2_Fwd = 1;
+  v_right_St_5_LineFollowing_St_2_Fwd =
+    ((vel_out_right when St_5_LineFollowing(ck)) when St_2_Fwd(ck_1));
+  v_left_St_5_LineFollowing_St_2_Fwd =
+    ((vel_out_left when St_5_LineFollowing(ck)) when St_2_Fwd(ck_1));
+  nr_2_St_2_Fwd = if v_34 then true else false;
+  ns_2_St_2_Fwd = if v_34 then St_2_Back else St_2_Fwd;
+  v_34 = (v_33 = false);
+  v_33 = (v_32 or ((ss4 when St_5_LineFollowing(ck)) when St_2_Fwd(ck_1)));
+  v_32 = (v_31 or ((ss3 when St_5_LineFollowing(ck)) when St_2_Fwd(ck_1)));
+  v_31 = (v_30 or ((ss2 when St_5_LineFollowing(ck)) when St_2_Fwd(ck_1)));
+  v_30 =
+    (((ss0 when St_5_LineFollowing(ck)) when St_2_Fwd(ck_1)) or
+     ((ss1 when St_5_LineFollowing(ck)) when St_2_Fwd(ck_1)));
+  counter_St_5_LineFollowing_St_2_Back = 250;
+  obstacle_mode_St_5_LineFollowing_St_2_Back = false;
+  v_right_St_5_LineFollowing_St_2_Back = 100;
+  v_left_St_5_LineFollowing_St_2_Back = 100;
+  direction_St_5_LineFollowing_St_2_Back = 0;
+  nr_2_St_2_Back = if v_29 then true else false;
+  ns_2_St_2_Back = if v_29 then St_2_Fwd else St_2_Back;
+  v_29 = (v_28 or ((ss4 when St_5_LineFollowing(ck)) when St_2_Back(ck_1)));
+  v_28 = (v_27 or ((ss3 when St_5_LineFollowing(ck)) when St_2_Back(ck_1)));
+  v_27 = (v_26 or ((ss2 when St_5_LineFollowing(ck)) when St_2_Back(ck_1)));
+  v_26 =
+    (((ss0 when St_5_LineFollowing(ck)) when St_2_Back(ck_1)) or
+     ((ss1 when St_5_LineFollowing(ck)) when St_2_Back(ck_1)));
+  v_left_St_5_LineFollowing =
+    merge ck_1
+      (St_2_Back -> v_left_St_5_LineFollowing_St_2_Back)
+      (St_2_Fwd -> v_left_St_5_LineFollowing_St_2_Fwd)
+      (St_2_Init -> v_left_St_5_LineFollowing_St_2_Init);
+  v_right_St_5_LineFollowing =
+    merge ck_1
+      (St_2_Back -> v_right_St_5_LineFollowing_St_2_Back)
+      (St_2_Fwd -> v_right_St_5_LineFollowing_St_2_Fwd)
+      (St_2_Init -> v_right_St_5_LineFollowing_St_2_Init);
+  direction_St_5_LineFollowing =
+    merge ck_1
+      (St_2_Back -> direction_St_5_LineFollowing_St_2_Back)
+      (St_2_Fwd -> direction_St_5_LineFollowing_St_2_Fwd)
+      (St_2_Init -> direction_St_5_LineFollowing_St_2_Init);
+  obstacle_mode_St_5_LineFollowing =
+    merge ck_1
+      (St_2_Back -> obstacle_mode_St_5_LineFollowing_St_2_Back)
+      (St_2_Fwd -> obstacle_mode_St_5_LineFollowing_St_2_Fwd)
+      (St_2_Init -> obstacle_mode_St_5_LineFollowing_St_2_Init);
+  counter_St_5_LineFollowing =
+    merge ck_1
+      (St_2_Back -> counter_St_5_LineFollowing_St_2_Back)
+      (St_2_Fwd -> counter_St_5_LineFollowing_St_2_Fwd)
+      (St_2_Init -> counter_St_5_LineFollowing_St_2_Init);
+  ns_2 =
+    merge ck_1
+      (St_2_Back -> ns_2_St_2_Back)(St_2_Fwd -> ns_2_St_2_Fwd)
+      (St_2_Init -> ns_2_St_2_Init);
+  nr_2 =
+    merge ck_1
+      (St_2_Back -> nr_2_St_2_Back)(St_2_Fwd -> nr_2_St_2_Fwd)
+      (St_2_Init -> nr_2_St_2_Init);
+  nr_5_St_5_LineFollowing = if v_20 then true else v_25;
+  ns_5_St_5_LineFollowing = if v_20 then St_5_ObstacleAvoidance else v_24;
+  v_25 = if v_23 then true else false;
+  v_24 = if v_23 then St_5_Parking else St_5_LineFollowing;
+  v_23 = (v_21 & v_22);
+  v_22 = ((ir1 when St_5_LineFollowing(ck)) = 1);
+  v_21 = ((black when St_5_LineFollowing(ck)) = 1);
+  v_20 = ((ir0 when St_5_LineFollowing(ck)) = 1);
+  r_3 = pnr_3;
+  pnr_3 = if (r_5 when St_5_ObstacleAvoidance(ck)) then false else v_19;
+  v_19 = false fby nr_3;
+  ck_2 =
+    if (r_5 when St_5_ObstacleAvoidance(ck)) then St_3_RotateLeft else v_18;
+  v_18 = St_3_RotateLeft fby ns_3;
+  counter_St_5_ObstacleAvoidance_St_3_RotateLeft = 250;
+  obstacle_mode_St_5_ObstacleAvoidance_St_3_RotateLeft = true;
+  direction_St_5_ObstacleAvoidance_St_3_RotateLeft = 1;
+  v_left_St_5_ObstacleAvoidance_St_3_RotateLeft = 0;
+  v_right_St_5_ObstacleAvoidance_St_3_RotateLeft = 85;
+  nr_3_St_3_RotateLeft = if v_17 then true else false;
+  ns_3_St_3_RotateLeft = if v_17 then St_3_Follow else St_3_RotateLeft;
+  v_17 = (v_15 & v_16);
+  v_16 =
+    (((ir2 when St_5_ObstacleAvoidance(ck)) when St_3_RotateLeft(ck_2)) = 1);
+  v_15 =
+    (((ir1 when St_5_ObstacleAvoidance(ck)) when St_3_RotateLeft(ck_2)) = 1);
+  counter_St_5_ObstacleAvoidance_St_3_Follow = 250;
+  obstacle_mode_St_5_ObstacleAvoidance_St_3_Follow = true;
+  direction_St_5_ObstacleAvoidance_St_3_Follow = 1;
+  v_left_St_5_ObstacleAvoidance_St_3_Follow = 120;
+  v_right_St_5_ObstacleAvoidance_St_3_Follow = 75;
+  nr_3_St_3_Follow = if v_14 then true else false;
+  ns_3_St_3_Follow = if v_14 then St_3_RotateRight else St_3_Follow;
+  v_14 = (((ir1 when St_5_ObstacleAvoidance(ck)) when St_3_Follow(ck_2)) = 0);
+  counter_St_5_ObstacleAvoidance_St_3_RotateRight = 250;
+  obstacle_mode_St_5_ObstacleAvoidance_St_3_RotateRight = true;
+  direction_St_5_ObstacleAvoidance_St_3_RotateRight = 1;
+  v_left_St_5_ObstacleAvoidance_St_3_RotateRight = 90;
+  v_right_St_5_ObstacleAvoidance_St_3_RotateRight = 0;
+  nr_3_St_3_RotateRight = if v_13 then true else false;
+  ns_3_St_3_RotateRight = if v_13 then St_3_Follow else St_3_RotateRight;
+  v_13 =
+    (((ir1 when St_5_ObstacleAvoidance(ck)) when St_3_RotateRight(ck_2)) = 1);
+  v_left_St_5_ObstacleAvoidance =
+    merge ck_2
+      (St_3_RotateRight -> v_left_St_5_ObstacleAvoidance_St_3_RotateRight)
+      (St_3_Follow -> v_left_St_5_ObstacleAvoidance_St_3_Follow)
+      (St_3_RotateLeft -> v_left_St_5_ObstacleAvoidance_St_3_RotateLeft);
+  v_right_St_5_ObstacleAvoidance =
+    merge ck_2
+      (St_3_RotateRight -> v_right_St_5_ObstacleAvoidance_St_3_RotateRight)
+      (St_3_Follow -> v_right_St_5_ObstacleAvoidance_St_3_Follow)
+      (St_3_RotateLeft -> v_right_St_5_ObstacleAvoidance_St_3_RotateLeft);
+  direction_St_5_ObstacleAvoidance =
+    merge ck_2
+      (St_3_RotateRight -> direction_St_5_ObstacleAvoidance_St_3_RotateRight)
+      (St_3_Follow -> direction_St_5_ObstacleAvoidance_St_3_Follow)
+      (St_3_RotateLeft -> direction_St_5_ObstacleAvoidance_St_3_RotateLeft);
+  obstacle_mode_St_5_ObstacleAvoidance =
+    merge ck_2
+      (St_3_RotateRight -> 
+        obstacle_mode_St_5_ObstacleAvoidance_St_3_RotateRight)
+      (St_3_Follow -> obstacle_mode_St_5_ObstacleAvoidance_St_3_Follow)
+      (St_3_RotateLeft -> 
+        obstacle_mode_St_5_ObstacleAvoidance_St_3_RotateLeft);
+  counter_St_5_ObstacleAvoidance =
+    merge ck_2
+      (St_3_RotateRight -> counter_St_5_ObstacleAvoidance_St_3_RotateRight)
+      (St_3_Follow -> counter_St_5_ObstacleAvoidance_St_3_Follow)
+      (St_3_RotateLeft -> counter_St_5_ObstacleAvoidance_St_3_RotateLeft);
+  ns_3 =
+    merge ck_2
+      (St_3_RotateRight -> ns_3_St_3_RotateRight)
+      (St_3_Follow -> ns_3_St_3_Follow)
+      (St_3_RotateLeft -> ns_3_St_3_RotateLeft);
+  nr_3 =
+    merge ck_2
+      (St_3_RotateRight -> nr_3_St_3_RotateRight)
+      (St_3_Follow -> nr_3_St_3_Follow)
+      (St_3_RotateLeft -> nr_3_St_3_RotateLeft);
+  nr_5_St_5_ObstacleAvoidance = if v_12 then true else false;
+  ns_5_St_5_ObstacleAvoidance =
+    if v_12 then St_5_LineFollowing else St_5_ObstacleAvoidance;
+  v_12 = (v_10 & v_11);
+  v_11 = ((ir0 when St_5_ObstacleAvoidance(ck)) = 0);
+  v_10 = ((s2 when St_5_ObstacleAvoidance(ck)) > 850);
+  r_4 = pnr_4;
+  pnr_4 = if (r_5 when St_5_Parking(ck)) then false else v_9;
+  v_9 = false fby nr_4;
+  ck_3 = if (r_5 when St_5_Parking(ck)) then St_4_Straight else v_8;
+  v_8 = St_4_Straight fby ns_4;
+  counter_St_5_Parking_St_4_Straight = 250;
+  obstacle_mode_St_5_Parking_St_4_Straight = false;
+  direction_St_5_Parking_St_4_Straight = 1;
+  v_right_St_5_Parking_St_4_Straight =
+    ((vel_out_right when St_5_Parking(ck)) when St_4_Straight(ck_3));
+  v_left_St_5_Parking_St_4_Straight =
+    ((vel_out_left when St_5_Parking(ck)) when St_4_Straight(ck_3));
+  nr_4_St_4_Straight = if v_7 then true else false;
+  ns_4_St_4_Straight = if v_7 then St_4_Right else St_4_Straight;
+  v_7 = (((ir1 when St_5_Parking(ck)) when St_4_Straight(ck_3)) = 0);
+  counter_St_5_Parking_St_4_Right = if v_4 then 430 else v_6;
+  v_6 = (v_5 - 1);
+  v_5 = pre ((counter when St_5_Parking(ck)) when St_4_Right(ck_3));
+  v_4 = if v_2 then true else v_3;
+  v_3 =
+    (((r_5 when St_5_Parking(ck)) when St_4_Right(ck_3)) or
+     (r_4 when St_4_Right(ck_3)));
+  v_2 = true fby false;
+  obstacle_mode_St_5_Parking_St_4_Right = false;
+  direction_St_5_Parking_St_4_Right = 1;
+  v_left_St_5_Parking_St_4_Right = 130;
+  v_right_St_5_Parking_St_4_Right = 25;
+  nr_4_St_4_Right = if v_1 then true else false;
+  ns_4_St_4_Right = if v_1 then St_4_Stop else St_4_Right;
+  v_1 = (((counter when St_5_Parking(ck)) when St_4_Right(ck_3)) <= 0);
+  counter_St_5_Parking_St_4_Forward = 250;
+  obstacle_mode_St_5_Parking_St_4_Forward = false;
+  direction_St_5_Parking_St_4_Forward = 1;
+  v_left_St_5_Parking_St_4_Forward = 60;
+  v_right_St_5_Parking_St_4_Forward = 60;
+  nr_4_St_4_Forward = if v then true else false;
+  ns_4_St_4_Forward = if v then St_4_Stop else St_4_Forward;
+  v = (((ir0 when St_5_Parking(ck)) when St_4_Forward(ck_3)) = 1);
+  counter_St_5_Parking_St_4_Stop = 250;
+  obstacle_mode_St_5_Parking_St_4_Stop = false;
+  direction_St_5_Parking_St_4_Stop = 1;
+  v_left_St_5_Parking_St_4_Stop = 0;
+  v_right_St_5_Parking_St_4_Stop = 0;
+  nr_4_St_4_Stop = false;
+  ns_4_St_4_Stop = St_4_Stop;
+  v_left_St_5_Parking =
+    merge ck_3
+      (St_4_Stop -> v_left_St_5_Parking_St_4_Stop)
+      (St_4_Forward -> v_left_St_5_Parking_St_4_Forward)
+      (St_4_Right -> v_left_St_5_Parking_St_4_Right)
+      (St_4_Straight -> v_left_St_5_Parking_St_4_Straight);
+  v_right_St_5_Parking =
+    merge ck_3
+      (St_4_Stop -> v_right_St_5_Parking_St_4_Stop)
+      (St_4_Forward -> v_right_St_5_Parking_St_4_Forward)
+      (St_4_Right -> v_right_St_5_Parking_St_4_Right)
+      (St_4_Straight -> v_right_St_5_Parking_St_4_Straight);
+  direction_St_5_Parking =
+    merge ck_3
+      (St_4_Stop -> direction_St_5_Parking_St_4_Stop)
+      (St_4_Forward -> direction_St_5_Parking_St_4_Forward)
+      (St_4_Right -> direction_St_5_Parking_St_4_Right)
+      (St_4_Straight -> direction_St_5_Parking_St_4_Straight);
+  obstacle_mode_St_5_Parking =
+    merge ck_3
+      (St_4_Stop -> obstacle_mode_St_5_Parking_St_4_Stop)
+      (St_4_Forward -> obstacle_mode_St_5_Parking_St_4_Forward)
+      (St_4_Right -> obstacle_mode_St_5_Parking_St_4_Right)
+      (St_4_Straight -> obstacle_mode_St_5_Parking_St_4_Straight);
+  counter_St_5_Parking =
+    merge ck_3
+      (St_4_Stop -> counter_St_5_Parking_St_4_Stop)
+      (St_4_Forward -> counter_St_5_Parking_St_4_Forward)
+      (St_4_Right -> counter_St_5_Parking_St_4_Right)
+      (St_4_Straight -> counter_St_5_Parking_St_4_Straight);
+  ns_4 =
+    merge ck_3
+      (St_4_Stop -> ns_4_St_4_Stop)(St_4_Forward -> ns_4_St_4_Forward)
+      (St_4_Right -> ns_4_St_4_Right)(St_4_Straight -> ns_4_St_4_Straight);
+  nr_4 =
+    merge ck_3
+      (St_4_Stop -> nr_4_St_4_Stop)(St_4_Forward -> nr_4_St_4_Forward)
+      (St_4_Right -> nr_4_St_4_Right)(St_4_Straight -> nr_4_St_4_Straight);
+  nr_5_St_5_Parking = false;
+  ns_5_St_5_Parking = St_5_Parking;
+  v_left =
+    merge ck
+      (St_5_Parking -> v_left_St_5_Parking)
+      (St_5_ObstacleAvoidance -> v_left_St_5_ObstacleAvoidance)
+      (St_5_LineFollowing -> v_left_St_5_LineFollowing)
+      (St_5_Init -> v_left_St_5_Init);
+  v_right =
+    merge ck
+      (St_5_Parking -> v_right_St_5_Parking)
+      (St_5_ObstacleAvoidance -> v_right_St_5_ObstacleAvoidance)
+      (St_5_LineFollowing -> v_right_St_5_LineFollowing)
+      (St_5_Init -> v_right_St_5_Init);
+  direction =
+    merge ck
+      (St_5_Parking -> direction_St_5_Parking)
+      (St_5_ObstacleAvoidance -> direction_St_5_ObstacleAvoidance)
+      (St_5_LineFollowing -> direction_St_5_LineFollowing)
+      (St_5_Init -> direction_St_5_Init);
+  obstacle_mode =
+    merge ck
+      (St_5_Parking -> obstacle_mode_St_5_Parking)
+      (St_5_ObstacleAvoidance -> obstacle_mode_St_5_ObstacleAvoidance)
+      (St_5_LineFollowing -> obstacle_mode_St_5_LineFollowing)
+      (St_5_Init -> obstacle_mode_St_5_Init);
+  counter =
+    merge ck
+      (St_5_Parking -> counter_St_5_Parking)
+      (St_5_ObstacleAvoidance -> counter_St_5_ObstacleAvoidance)
+      (St_5_LineFollowing -> counter_St_5_LineFollowing)
+      (St_5_Init -> counter_St_5_Init);
+  ns_5 =
+    merge ck
+      (St_5_Parking -> ns_5_St_5_Parking)
+      (St_5_ObstacleAvoidance -> ns_5_St_5_ObstacleAvoidance)
+      (St_5_LineFollowing -> ns_5_St_5_LineFollowing)
+      (St_5_Init -> ns_5_St_5_Init);
+  nr_5 =
+    merge ck
+      (St_5_Parking -> nr_5_St_5_Parking)
+      (St_5_ObstacleAvoidance -> nr_5_St_5_ObstacleAvoidance)
+      (St_5_LineFollowing -> nr_5_St_5_LineFollowing)
+      (St_5_Init -> nr_5_St_5_Init);
+  kd3 = 2;
+  kd2 = 2;
+  kd1 = 2;
+  kp3 = 3;
+  kp2 = 4;
+  kp1 = 1
+tel
+

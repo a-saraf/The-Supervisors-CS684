@@ -1,0 +1,2 @@
+All the team members discussed the code implementation and the working procedure of the code.
+The code was completed and reviewed, the testcases were checked and debugged by all the members. 
